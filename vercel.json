@@ -1,16 +1,5 @@
 {
-    "builds": [
-      {
-        "src": "start.sh",
-        "use": "@vercel/static-build",
-        "config": { "distDir": "." }
-      }
-    ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "start.sh"
-      }
+    "rewrites": [
+      { "source": "/(.*)", "destination": "app" }
     ]
   }
-  
