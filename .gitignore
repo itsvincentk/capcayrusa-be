@@ -1,0 +1,6 @@
+.vercel
+echo "venv/
+__pycache__/
+*.pyc
+.env
+.migrations/" > .gitignore
