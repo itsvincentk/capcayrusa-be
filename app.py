@@ -4,8 +4,10 @@ from models.db import db
 from models.user import User  # Import the User model
 from routes.main import main
 from config.config import Config
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 app.config.from_object(Config)
 
 # Initialize database
