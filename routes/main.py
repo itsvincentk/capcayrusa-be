@@ -8,6 +8,23 @@ main = Blueprint("main", __name__)
 # Secret key for JWT encoding/decoding
 secret_key = "lavanya"  # Replace this with your actual secret key
 
+
+def verify_jwt_token(token):
+    """
+    Verifies the JWT token and returns the decoded data if valid.
+    :param token: The JWT token to verify.
+    :return: Decoded token data if valid, or raises an error if invalid or expired.
+    """
+    try:
+        # Decode the token and verify its validity
+        decoded_token = jwt.decode(token, secret_key, algorithms=["HS256"])
+        return decoded_token
+    except jwt.ExpiredSignatureError:
+        raise jwt.ExpiredSignatureError("Token has expired")
+    except jwt.InvalidTokenError:
+        raise jwt.InvalidTokenError("Invalid token")
+
+
 @main.route("/login", methods=["POST"])
 def login():
     # Get the password from the request
@@ -37,16 +54,21 @@ def login():
 
 @main.route("/verifyjwt", methods=["POST"])
 def verify_jwt():
-    # Get the token from the request
-    data = request.get_json()
-    token = data.get("token")
+    # Get the token from the Authorization header
+    auth_header = request.headers.get("Authorization")
 
-    if not token:
-        return jsonify({"message": "Token is missing"}), 400
+    if not auth_header:
+        return jsonify({"message": "Authorization header is missing"}), 400
+
+    # Extract the token from the 'Bearer <token>' format
+    try:
+        token = auth_header.split(" ")[1]  # Get token after "Bearer"
+    except IndexError:
+        return jsonify({"message": "Token is missing from the Authorization header"}), 400
 
     try:
-        # Decode the token and verify its validity
-        decoded_token = jwt.decode(token, secret_key, algorithms=["HS256"])
+        # Verify the JWT token using the separate method
+        decoded_token = verify_jwt_token(token)
 
         # If decoding is successful, return the decoded data
         return jsonify({
@@ -54,8 +76,8 @@ def verify_jwt():
             "user_id": decoded_token["user_id"]
         }), 200
 
-    except jwt.ExpiredSignatureError:
-        return jsonify({"message": "Token has expired"}), 401
+    except jwt.ExpiredSignatureError as e:
+        return jsonify({"message": str(e)}), 401
 
-    except jwt.InvalidTokenError:
-        return jsonify({"message": "Invalid token"}), 401
+    except jwt.InvalidTokenError as e:
+        return jsonify({"message": str(e)}), 401
