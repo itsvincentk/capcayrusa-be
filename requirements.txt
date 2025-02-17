@@ -4,3 +4,4 @@ python-dotenv
 flask_sqlalchemy
 flask_migrate
 pyjwt
+flask_cors
